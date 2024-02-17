@@ -6,6 +6,7 @@ class ImageMapper {
     return ImageEntity(
       id: dto.id,
       urls: dto.urls,
+      description: dto.description,
     );
   }
 }
