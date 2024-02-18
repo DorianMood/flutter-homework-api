@@ -23,6 +23,9 @@ class ImagesApi implements IImagesApi {
   Future<ImageStatisticsEntity> getImageStatistics(String id) async {
     return httpClient
         .get('/photos/$id/statistics')
+        .then((value) {
+          return value;
+        })
         .then((response) => ImageStatisticsDto.fromJson(response.data))
         .then((dto) => ImageStatisticsMapper.map(dto));
   }

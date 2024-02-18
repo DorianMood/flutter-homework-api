@@ -6,20 +6,27 @@ part of 'image_statistics_dto.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+DetailsDto _$DetailsDtoFromJson(Map<String, dynamic> json) => DetailsDto(
+      total: json['total'] as int,
+    );
+
+Map<String, dynamic> _$DetailsDtoToJson(DetailsDto instance) =>
+    <String, dynamic>{
+      'total': instance.total,
+    };
+
 ImageStatisticsDto _$ImageStatisticsDtoFromJson(Map<String, dynamic> json) =>
     ImageStatisticsDto(
       id: json['id'] as String,
-      views: json['views'] as int,
-      downloads: json['downloads'] as int,
-      likes: json['likes'] as int,
-      urls: Map<String, String>.from(json['urls'] as Map),
+      views: DetailsDto.fromJson(json['views'] as Map<String, dynamic>),
+      downloads: DetailsDto.fromJson(json['downloads'] as Map<String, dynamic>),
+      likes: DetailsDto.fromJson(json['likes'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ImageStatisticsDtoToJson(ImageStatisticsDto instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'views': instance.views,
-      'downloads': instance.downloads,
-      'likes': instance.likes,
-      'urls': instance.urls,
+      'views': instance.views.toJson(),
+      'downloads': instance.downloads.toJson(),
+      'likes': instance.likes.toJson(),
     };

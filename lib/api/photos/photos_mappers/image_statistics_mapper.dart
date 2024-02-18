@@ -5,10 +5,9 @@ class ImageStatisticsMapper {
   static ImageStatisticsEntity map(ImageStatisticsDto dto) {
     return ImageStatisticsEntity(
       id: dto.id,
-      urls: dto.urls,
-      views: dto.views,
-      downloads: dto.downloads,
-      likes: dto.likes,
+      views: dto.views?.total ?? 0,
+      downloads: dto.downloads?.total ?? 0,
+      likes: dto.likes?.total ?? 0,
     );
   }
 }

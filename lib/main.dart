@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_api/api/photos/images_api.dart';
 import 'package:flutter_api/entities/image_entity.dart';
+import 'package:flutter_api/widgets/photo_detailed.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -47,46 +48,50 @@ class _HomePageState extends State<HomePage> {
     final imagesApi = ImagesApi(httpClient: httpClient);
 
     imagesApi.getImages().then((value) {
-      setState(() {
-        images = value;
-      });
+      if (mounted) {
+        setState(() {
+          images = value;
+        });
+      }
     });
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverList(
-            delegate: SliverChildListDelegate(
-              images == null
-                  ? [const Text('Loading...')]
-                  : images!
-                      .map(
-                        (item) => Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          elevation: 1,
-                          margin: const EdgeInsets.all(4),
-                          child: Stack(children: [
-                            Image.network(item.urls['regular'] ?? ''),
-                            Positioned.fill(
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    print('LOL');
-                                  },
+      body: ListView(
+        children: images == null
+            ? [const Text('Loading...')]
+            : images!
+                .map(
+                  (item) => Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    elevation: 1,
+                    margin: const EdgeInsets.all(4),
+                    child: Stack(children: [
+                      Image.network(item.urls['regular'] ?? ''),
+                      Positioned.fill(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (builder) => PhotoDetailed(
+                                    id: item.id,
+                                    url: item.urls['regular'] ?? '',
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ]),
+                              );
+                            },
+                          ),
                         ),
-                      )
-                      .toList(),
-            ),
-          ),
-        ],
+                      ),
+                    ]),
+                  ),
+                )
+                .toList(),
       ),
     );
   }
