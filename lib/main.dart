@@ -1,6 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_api/api/photos/images_api.dart';
+import 'package:flutter_api/entities/image_entity.dart';
+import 'package:flutter_api/widgets/photo_detailed.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  await dotenv.load();
   runApp(const MyApp());
 }
 
@@ -10,59 +16,82 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter api homework',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const HomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+class _HomePageState extends State<HomePage> {
+  List<ImageEntity>? images;
 
   @override
   Widget build(BuildContext context) {
+    final httpClient = Dio(
+      BaseOptions(
+        baseUrl: 'https://api.unsplash.com',
+        headers: {'Authorization': 'Client-ID ${dotenv.get('ACCESS_KEY')}'},
+      ),
+    );
+
+    final imagesApi = ImagesApi(httpClient: httpClient);
+
+    imagesApi.getImages().then((value) {
+      if (mounted) {
+        setState(() {
+          images = value;
+        });
+      }
+    });
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      body: ListView(
+        children: images == null
+            ? [const Text('Loading...')]
+            : images!
+                .map(
+                  (item) => Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    elevation: 1,
+                    margin: const EdgeInsets.all(4),
+                    child: Stack(children: [
+                      Image.network(item.urls['regular'] ?? ''),
+                      Positioned.fill(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (builder) => PhotoDetailed(
+                                    id: item.id,
+                                    url: item.urls['regular'] ?? '',
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ]),
+                  ),
+                )
+                .toList(),
       ),
     );
   }
